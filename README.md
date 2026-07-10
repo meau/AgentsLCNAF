@@ -227,6 +227,35 @@ For the matched name, it also rebuilds the parsed name fields from the LCNAF lab
 
 For corporate entities, the script may preserve the old name as a deprecated local name if it matches an LC variant label.
 
+## Merge behavior
+
+One helpful feature of this script is that it can merge duplicate ArchivesSpace agent records when an LC authority ID conflict is detected.
+
+This matters because two separate ArchivesSpace agent records may sometimes represent the same real-world person, organization, or family. If the script finds an LCNAF match and tries to save the update, ArchivesSpace may reject the change if another agent already has that same authority ID. In that case, the script treats the conflict as a sign that the two records may actually be duplicates.
+
+### How the merge works
+
+If ArchivesSpace returns an error saying that the authority ID must be unique, the script:
+
+1. looks for the conflicting ArchivesSpace agent URI in the error response,
+2. treats the current record as the source,
+3. treats the conflicting record as the destination,
+4. and submits an ArchivesSpace merge request.
+
+In other words, instead of failing and stopping, the script can use the LC authority conflict to move the current record into the already-existing duplicate record.
+
+### Why this is useful
+
+This is especially helpful when duplicate records have been created over time and later turn out to represent the same entity. The shared LC authority ID provides a strong signal that the records should probably be combined rather than maintained separately.
+
+Instead of leaving two parallel records in ArchivesSpace, the merge helps consolidate authority control and reduce duplication.
+
+### Important caution
+
+Although this is a useful feature, it is still a significant action. A merge can affect linked records and should be used carefully. The script only triggers the merge in a narrow case: when ArchivesSpace rejects the update because the authority ID already exists on another record.
+
+So in practice, the merge behavior is intended as a helpful cleanup step for duplicate records, not as a general-purpose automatic merge rule.
+
 ## Reports and output files
 
 ### JSONL report
